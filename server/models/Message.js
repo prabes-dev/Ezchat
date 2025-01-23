@@ -11,7 +11,6 @@ const messageSchema = new mongoose.Schema({
   }
 });
 
-// Alternative approach using explicit index creation
 messageSchema.index({ createdAt: 1 }, { expireAfterSeconds: 86400 });
 
 const Message = mongoose.model('Message', messageSchema);

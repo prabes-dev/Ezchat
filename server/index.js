@@ -22,12 +22,13 @@ const io = new Server(server, {
   transports: ['websocket', 'polling'],
   allowEIO3: true,
 });
+
+
 // Middleware
 app.use(cors());
 app.use(express.json());
 
 // MongoDB connection
-// has a problem of connecting using env
 const connectDB = async () => {
   try {
     const MONGO_URI = process.env.MONGO_URI || 'your mongoDb uri';

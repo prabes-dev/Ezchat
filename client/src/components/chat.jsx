@@ -17,7 +17,6 @@ export const Chat = ({ username, messages, onNewMessage, currentServer, currentG
     scrollToBottom();
   }, [messages]);
 
-  // Auto-focus the input field when typing starts
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
@@ -26,12 +25,12 @@ export const Chat = ({ username, messages, onNewMessage, currentServer, currentG
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!message.trim()) return; // Prevent submitting empty messages
+    if (!message.trim()) return;
 
     try {
       onNewMessage(message);
       setMessage('');
-      setErrorMessage(''); // Clear any previous error
+      setErrorMessage('');
     } catch (error) {
       setErrorMessage('Failed to send message');
     }
