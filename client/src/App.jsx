@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import './App.css';
@@ -7,6 +5,8 @@ import { Login } from './pages/Login';
 import { Chat } from './components/chat';
 import { List } from './components/list';
 
+
+// refuse to connect to the server using env 
   const socket = io(import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000', {
     reconnection: true,
     reconnectionAttempts: 5,

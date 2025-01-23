@@ -8,29 +8,29 @@ import Message from './models/Message.js';
 import messageRoutes from './routes/messageRoutes.js';
 
 
-
 const app = express();
 const server = createServer(app);
 app.use('/api', messageRoutes);
-
+// has a problem of connecting using env
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    // origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: '*',
     methods: ['GET', 'POST'],
   },
   path: '/socket.io/',
   transports: ['websocket', 'polling'],
   allowEIO3: true,
 });
-
 // Middleware
 app.use(cors());
 app.use(express.json());
 
 // MongoDB connection
+// has a problem of connecting using env
 const connectDB = async () => {
   try {
-    const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/chat_app';
+    const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://prabes59:sLMC71ug1QzhM8OL@ezchat.6745k.mongodb.net/';
     await mongoose.connect(MONGO_URI);
     console.log('MongoDB connected successfully');
   } catch (err) {
@@ -38,7 +38,6 @@ const connectDB = async () => {
     process.exit(1);
   }
 };
-
 // Online users map
 const onlineUsers = new Map();
 
