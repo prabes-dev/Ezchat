@@ -30,7 +30,7 @@ app.use(express.json());
 // has a problem of connecting using env
 const connectDB = async () => {
   try {
-    const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://prabes59:sLMC71ug1QzhM8OL@ezchat.6745k.mongodb.net/';
+    const MONGO_URI = process.env.MONGO_URI || 'your mongoDb uri';
     await mongoose.connect(MONGO_URI);
     console.log('MongoDB connected successfully');
   } catch (err) {
