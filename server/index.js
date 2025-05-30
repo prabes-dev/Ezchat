@@ -31,7 +31,7 @@ app.use(express.json());
 // MongoDB connection
 const connectDB = async () => {
   try {
-    const MONGO_URI = process.env.MONGO_URI || 'your mongoDb uri';
+    const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/ezchat';
     await mongoose.connect(MONGO_URI);
     console.log('MongoDB connected successfully');
   } catch (err) {
