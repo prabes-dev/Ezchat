@@ -1,32 +1,30 @@
-// server/index.js
+
+
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
 import mongoose from 'mongoose';
-import Message from './models/Message.js';
-import messageRoutes from './routes/messageRoutes.js';
-
+import Message from './Schema/Message.js';
+import { Socket } from 'dgram';
 
 const app = express();
 const server = createServer(app);
-app.use('/api', messageRoutes);
-// has a problem of connecting using env
+
+// Express middleware
+app.use(cors());
+app.use(express.json());
+
+// Socket.IO setup
 const io = new Server(server, {
   cors: {
-    // origin: process.env.CLIENT_URL || 'http://localhost:5173',
-    origin: '*',
+    origin: '*', // Use specific origin in production
     methods: ['GET', 'POST'],
   },
   path: '/socket.io/',
   transports: ['websocket', 'polling'],
   allowEIO3: true,
 });
-
-
-// Middleware
-app.use(cors());
-app.use(express.json());
 
 // MongoDB connection
 const connectDB = async () => {
@@ -39,14 +37,16 @@ const connectDB = async () => {
     process.exit(1);
   }
 };
-// Online users map
+
+
+// Track online users per room
 const onlineUsers = new Map();
 
-// Socket event handlers
-const handleJoinServer = async (socket, { server, group, username }) => {
-  const room = `${server}-${group}`;
-  
-  // Leave current room if exists
+// Handle user joining a server
+const handleJoinServer = async (socket, { server, username }) => {
+  const room = `${server}`;
+
+  // Leave previous room
   if (socket.currentRoom) {
     socket.leave(socket.currentRoom);
     const users = onlineUsers.get(socket.currentRoom);
@@ -62,11 +62,9 @@ const handleJoinServer = async (socket, { server, group, username }) => {
   socket.join(room);
 
   try {
-    // Load message history
     const messages = await Message.find({ room }).sort({ timestamp: 1 }).lean().exec();
     socket.emit('load_message_history', messages);
 
-    // Update online users
     if (!onlineUsers.has(room)) {
       onlineUsers.set(room, new Set());
     }
@@ -78,49 +76,31 @@ const handleJoinServer = async (socket, { server, group, username }) => {
   }
 };
 
+// Handle incoming messages
 const handleSendMessage = async (socket, messageData) => {
-  const room = `${messageData.server}-${messageData.group}`;
+  const room = `${messageData.server}`;
   try {
-    const newMessage = new Message({ 
+    const newMessage = new Message({
       room,
       user: messageData.user,
       text: messageData.text,
       timestamp: new Date(messageData.timestamp),
       isPinned: false,
       id: messageData.id,
-      createdAt: new Date()
     });
+
     await newMessage.save();
 
-    io.to(room).emit('receive_message', newMessage);
+    socket.to(room).emit('receive_message', newMessage);
   } catch (error) {
     console.error('Error in handleSendMessage:', error);
     socket.emit('error', 'Failed to send message');
   }
 };
 
-const handlePinMessage = async (socket, { messageId, roomKey, isPinned }) => {
-  try {
-    const updatedMessage = await Message.findByIdAndUpdate(
-      messageId, // Use MongoDB's _id
-      { isPinned },
-      { new: true }
-    );
-    
-    if (!updatedMessage) throw new Error('Message not found');
 
-    // Emit to all clients in the room
-    io.to(roomKey).emit('pin_update', { 
-      messageId: updatedMessage._id,
-      roomKey,
-      isPinned: updatedMessage.isPinned
-    });
-  } catch (error) {
-    console.error('Error in handlePinMessage:', error);
-    socket.emit('error', 'Failed to update pin status');
-  }
-};
 
+// Handle disconnection
 const handleDisconnect = (socket) => {
   const { currentRoom, currentUsername } = socket;
   if (currentRoom && currentUsername) {
@@ -134,16 +114,25 @@ const handleDisconnect = (socket) => {
   console.log('User disconnected:', socket.id);
 };
 
-// Socket.io connection handling
+// Handle socket connections
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
-  socket.on('join_server', (data) => handleJoinServer(socket, data));
+
+  socket.on('join_server', async (data, callback) => {
+    try {
+      await handleJoinServer(socket, data);
+      if (callback) callback({ success: true });
+    } catch (err) {
+      console.error('Join server failed:', err);
+      if (callback) callback({ success: false, error: 'Join failed' });
+    }
+  });
+
   socket.on('send_message', (data) => handleSendMessage(socket, data));
-  socket.on('pin_message', (data) => handlePinMessage(socket, data));
   socket.on('disconnect', () => handleDisconnect(socket));
 });
 
-// Start server
+// Start the server
 const PORT = process.env.PORT || 3000;
 const startServer = async () => {
   await connectDB();

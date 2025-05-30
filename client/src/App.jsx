@@ -239,15 +239,6 @@ function App() {
 
   return (
     <div className="app-container flex h-screen bg-gray-800">
-      {/* Debug info */}
-      <div className="fixed top-0 right-0 bg-black text-white p-2 text-xs z-50">
-        <div>Socket: {socketConnected ? '✅' : '❌'}</div>
-        <div>Server: {currentServer}</div>
-        <div>Messages: {getCurrentMessages().length}</div>
-        <div>Users: {getCurrentOnlineUsers().length}</div>
-        <div>User: {user.username}</div>
-      </div>
-      
       <List
         username={user.username}
         onServerChange={(server) => {

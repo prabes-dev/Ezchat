@@ -5,7 +5,7 @@ import { ChevronDown, User, Globe, Circle, X } from 'lucide-react';
 const servers = {
   'US': { name: 'United States', icon: '🇺🇸' },
   'UK': { name: 'United Kingdom', icon: '🇬🇧' },
-  'IN': { name: 'India', icon: '🇮🇳' },
+  'IN': { name: 'Nepal', icon: '🇳🇵' },
   'JP': { name: 'Japan', icon: '🇯🇵' },
   'AU': { name: 'Australia', icon: '🇦🇺' },
 };
