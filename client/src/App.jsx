@@ -5,11 +5,7 @@ import { Login } from './pages/Login';
 import { Chat } from './components/chat';
 import { List } from './components/list';
 
-const socket = io(import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000', {
-  reconnection: true,
-  reconnectionAttempts: 5,
-  reconnectionDelay: 1000,
-});
+const socket = io(); 
 
 function App() {
   const [user, setUser] = useState({ isLoggedIn: false, username: '' });

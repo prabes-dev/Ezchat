@@ -1,12 +1,9 @@
-
-
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import Message from './Schema/Message.js';
-import { Socket } from 'dgram';
 
 const app = express();
 const server = createServer(app);
@@ -17,14 +14,13 @@ app.use(express.json());
 
 // Socket.IO setup
 const io = new Server(server, {
-  cors: {
-    origin: '*', // Use specific origin in production
-    methods: ['GET', 'POST'],
-  },
   path: '/socket.io/',
   transports: ['websocket', 'polling'],
   allowEIO3: true,
 });
+
+
+app.use(express.static('public'));
 
 // MongoDB connection
 const connectDB = async () => {
